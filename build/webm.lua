@@ -6,6 +6,49 @@ local mpopts = require("mp.options")
 local options = {
 	-- Defaults to shift+w
 	keybind = "W",
+
+	keybind_up = "w",
+	display_up = "▲ w",
+
+	keybind_down = "s",
+	display_down = "▼ s",
+
+	keybind_left = "a",
+	display_left = "◀ A",
+
+	keybind_right = "d",
+	display_right = "D ▶",
+
+	keybind_confirm = "ENTER",
+	display_confirm = "⎆ ENTER",
+	keybind_cancel = "ESC",
+	display_cancel = "🗙 ESC",
+
+	keybind_seta = "a",
+	display_seta = "{\\c&H0f00df&}●{\\c&HFFFFFF&} 1",
+
+	keybind_setb = "b",
+	display_setb = "{\\c&HDF8600&}●{\\c&HFFFFFF&} 2",
+
+	keybind_options = "o",
+	display_options = "☰ o",
+
+	keybind_preview = "p",
+	display_preview = "p",
+
+	keybind_encode = "e",
+	display_encode = "🎥 e",
+
+	keybind_crop = "c",
+	display_crop = "⎄ c",
+
+	keybind_reset = "r",
+	display_reset = "⎚ r",
+
+	-- Set Point A, the start time after showing up the GUI
+	seta = false,
+	-- Starts encode immediately after setting Point B, the end time
+	setb = false,
 	-- If empty, saves on the same directory of the playing video.
 	-- A starting "~" will be replaced by the home dir.
 	-- This field is delimited by double-square-brackets - [[ and ]] - instead of
@@ -101,6 +144,14 @@ end
 local bold
 bold = function(text)
   return "{\\b1}" .. tostring(text) .. "{\\b0}"
+end
+local color
+color = function(rrggbb, text)
+  if string.sub(rrggbb, 1, 1) == "#" then
+    rrggbb = string.sub(rrggbb, 2, 7)
+  end
+  local rr, gg, bb = string.sub(rrggbb, 1, 2), string.sub(rrggbb, 3, 4), string.sub(rrggbb, 5, 6)
+  return "{\\c&H" .. tostring(bb) .. tostring(gg) .. tostring(rr) .. "&}" .. tostring(text) .. "{\\c&HFFFFFF&}"
 end
 local message
 message = function(text, duration)
@@ -1577,12 +1628,12 @@ do
       ass:new_event()
       self:setup_text(ass)
       ass:append(tostring(bold('Crop:')) .. "\\N")
-      ass:append(tostring(bold('1:')) .. " change point A (" .. tostring(self.pointA.x) .. ", " .. tostring(self.pointA.y) .. ")\\N")
-      ass:append(tostring(bold('2:')) .. " change point B (" .. tostring(self.pointB.x) .. ", " .. tostring(self.pointB.y) .. ")\\N")
-      ass:append(tostring(bold('r:')) .. " reset to whole screen\\N")
-      ass:append(tostring(bold('ESC:')) .. " cancel crop\\N")
+      ass:append(tostring(bold(tostring(options.display_seta) .. ':')) .. " change point A (" .. tostring(self.pointA.x) .. ", " .. tostring(self.pointA.y) .. ")\\N")
+      ass:append(tostring(bold(tostring(options.display_setb) .. ':')) .. " change point B (" .. tostring(self.pointB.x) .. ", " .. tostring(self.pointB.y) .. ")\\N")
+      ass:append(tostring(bold(tostring(options.display_reset) .. ':')) .. " reset to whole screen\\N")
+      ass:append(tostring(bold(tostring(options.display_cancel) .. ':')) .. " cancel crop\\N")
       local width, height = math.abs(self.pointA.x - self.pointB.x), math.abs(self.pointA.y - self.pointB.y)
-      ass:append(tostring(bold('ENTER:')) .. " confirm crop (" .. tostring(width) .. "x" .. tostring(height) .. ")\\N")
+      ass:append(tostring(bold(tostring(options.display_confirm) .. ':')) .. " confirm crop (" .. tostring(width) .. "x" .. tostring(height) .. ")\\N")
       return mp.set_osd_ass(window.w, window.h, ass.text)
     end
   }
@@ -1593,35 +1644,35 @@ do
       self.pointA = VideoPoint()
       self.pointB = VideoPoint()
       self.keybinds = {
-        ["1"] = (function()
+        [options.keybind_seta] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.setPointA
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["2"] = (function()
+        [options.keybind_setb] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.setPointB
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["r"] = (function()
+        [options.keybind_reset] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.reset
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["ESC"] = (function()
+        [options.keybind_cancel] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.cancel
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["ENTER"] = (function()
+        [options.keybind_confirm] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.finish
           return function(...)
@@ -1790,11 +1841,11 @@ do
         ass:append(tostring(self.displayText) .. ": ")
       end
       if self:hasPrevious() then
-        ass:append("◀ ")
+        ass:append(tostring(options.display_left) .. " ")
       end
       ass:append(self:getDisplayValue())
       if self:hasNext() then
-        ass:append(" ▶")
+        ass:append(" " .. tostring(options.display_right))
       end
       return ass:append("\\N")
     end
@@ -1868,9 +1919,9 @@ do
         local opt = optPair[2]
         opt:draw(ass, self.currentOption == i)
       end
-      ass:append("\\N▲ / ▼: navigate\\N")
-      ass:append(tostring(bold('ENTER:')) .. " confirm options\\N")
-      ass:append(tostring(bold('ESC:')) .. " cancel\\N")
+      ass:append("\\N" .. tostring(options.display_up) .. " / " .. tostring(options.display_down) .. ": navigate\\N")
+      ass:append(tostring(bold(tostring(options.display_confirm) .. ':')) .. " confirm options\\N")
+      ass:append(tostring(bold(tostring(options.display_cancel) .. ':')) .. " cancel\\N")
       return mp.set_osd_ass(window_w, window_h, ass.text)
     end
   }
@@ -1980,42 +2031,42 @@ do
         }
       }
       self.keybinds = {
-        ["LEFT"] = (function()
+        [options.keybind_left] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.leftKey
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["RIGHT"] = (function()
+        [options.keybind_right] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.rightKey
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["UP"] = (function()
+        [options.keybind_up] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.prevOpt
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["DOWN"] = (function()
+        [options.keybind_down] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.nextOpt
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["ENTER"] = (function()
+        [options.keybind_confirm] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.confirmOpts
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["ESC"] = (function()
+        [options.keybind_cancel] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.cancelOpts
           return function(...)
@@ -2092,7 +2143,7 @@ do
       local ass = assdraw.ass_new()
       ass:new_event()
       self:setup_text(ass)
-      ass:append("Press " .. tostring(bold('ESC')) .. " to exit preview.\\N")
+      ass:append("Press " .. tostring(bold("[options.keybind_cancel]")) .. " to exit preview.\\N")
       return mp.set_osd_ass(window_w, window_h, ass.text)
     end,
     cancel = function(self)
@@ -2111,7 +2162,7 @@ do
         ["pause"] = mp.get_property_native("pause")
       }
       self.keybinds = {
-        ["ESC"] = (function()
+        [options.keybind_cancel] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.cancel
           return function(...)
@@ -2167,7 +2218,10 @@ do
       self.endTime = mp.get_property_number("time-pos")
       if self.visible then
         self:clear()
-        return self:draw()
+        self:draw()
+        if options.setb then
+          return self:encode()
+        end
       end
     end,
     setupStartAndEndTimes = function(self)
@@ -2183,19 +2237,24 @@ do
         return self:draw()
       end
     end,
+    prepare = function(self)
+      if options.seta then
+        return self:setStartTime()
+      end
+    end,
     draw = function(self)
       local window_w, window_h = mp.get_osd_size()
       local ass = assdraw.ass_new()
       ass:new_event()
       self:setup_text(ass)
       ass:append(tostring(bold('WebM maker')) .. "\\N\\N")
-      ass:append(tostring(bold('c:')) .. " crop\\N")
-      ass:append(tostring(bold('1:')) .. " set start time (current is " .. tostring(seconds_to_time_string(self.startTime)) .. ")\\N")
-      ass:append(tostring(bold('2:')) .. " set end time (current is " .. tostring(seconds_to_time_string(self.endTime)) .. ")\\N")
-      ass:append(tostring(bold('o:')) .. " change encode options\\N")
-      ass:append(tostring(bold('p:')) .. " preview\\N")
-      ass:append(tostring(bold('e:')) .. " encode\\N\\N")
-      ass:append(tostring(bold('ESC:')) .. " close\\N")
+      ass:append(tostring(bold(tostring(options.display_crop) .. ':')) .. " crop\\N")
+      ass:append(tostring(bold(tostring(options.display_seta) .. ':')) .. " set start time (current is " .. tostring(seconds_to_time_string(self.startTime)) .. ")\\N")
+      ass:append(tostring(bold(tostring(options.display_setb) .. ':')) .. " set end time (current is " .. tostring(seconds_to_time_string(self.endTime)) .. ")\\N")
+      ass:append(tostring(bold(tostring(options.display_options) .. ':')) .. " change encode options\\N")
+      ass:append(tostring(bold(tostring(options.display_preview) .. ':')) .. " preview\\N")
+      ass:append(tostring(bold(tostring(options.display_encode) .. ':')) .. " encode\\N\\N")
+      ass:append(tostring(bold(tostring(options.display_cancel) .. ':')) .. " close\\N")
       return mp.set_osd_ass(window_w, window_h, ass.text)
     end,
     onUpdateCropRegion = function(self, updated, newRegion)
@@ -2265,49 +2324,49 @@ do
   _class_0 = setmetatable({
     __init = function(self)
       self.keybinds = {
-        ["c"] = (function()
+        [options.keybind_crop] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.crop
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["1"] = (function()
+        [options.keybind_seta] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.setStartTime
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["2"] = (function()
+        [options.keybind_setb] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.setEndTime
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["o"] = (function()
+        [options.keybind_options] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.changeOptions
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["p"] = (function()
+        [options.keybind_preview] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.preview
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["e"] = (function()
+        [options.keybind_encode] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.encode
           return function(...)
             return _fn_0(_base_1, ...)
           end
         end)(),
-        ["ESC"] = (function()
+        [options.keybind_cancel] = (function()
           local _base_1 = self
           local _fn_0 = _base_1.hide
           return function(...)
@@ -2351,6 +2410,60 @@ local mainPage = MainPage()
 mp.add_key_binding(options.keybind, "display-webm-encoder", (function()
   local _base_0 = mainPage
   local _fn_0 = _base_0.show
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_options, "display-webm-encoder-options", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.changeOptions
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_preview, "display-webm-encoder-preview", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.preview
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_encode, "display-webm-encoder-encode", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.encode
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_cancel, "display-webm-encoder-close", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.hide
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_seta, "display-webm-encoder-seta", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.setStartTime
+  return function(...)
+    return _fn_0(_base_0, ...)
+  end
+end)(), {
+  repeatable = false
+})
+mp.add_key_binding(options.keybind_setb, "display-webm-encoder-setb", (function()
+  local _base_0 = mainPage
+  local _fn_0 = _base_0.setEndTime
   return function(...)
     return _fn_0(_base_0, ...)
   end

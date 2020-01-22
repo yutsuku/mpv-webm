@@ -3,11 +3,11 @@ class CropPage extends Page
 		@pointA = VideoPoint!
 		@pointB = VideoPoint!
 		@keybinds =
-			"1": self\setPointA
-			"2": self\setPointB
-			"r": self\reset
-			"ESC": self\cancel
-			"ENTER": self\finish
+			[options.keybind_seta]: self\setPointA
+			[options.keybind_setb]: self\setPointB
+			[options.keybind_reset]: self\reset
+			[options.keybind_cancel]: self\cancel
+			[options.keybind_confirm]: self\finish
 		self\reset!
 		@callback = callback
 		-- If we have a region, set point A and B from it
@@ -78,10 +78,10 @@ class CropPage extends Page
 		ass\new_event()
 		self\setup_text(ass)
 		ass\append("#{bold('Crop:')}\\N")
-		ass\append("#{bold('1:')} change point A (#{@pointA.x}, #{@pointA.y})\\N")
-		ass\append("#{bold('2:')} change point B (#{@pointB.x}, #{@pointB.y})\\N")
-		ass\append("#{bold('r:')} reset to whole screen\\N")
-		ass\append("#{bold('ESC:')} cancel crop\\N")
+		ass\append("#{bold( "#{options.display_seta}" .. ':')} change point A (#{@pointA.x}, #{@pointA.y})\\N")
+		ass\append("#{bold( "#{options.display_setb}" ..':')} change point B (#{@pointB.x}, #{@pointB.y})\\N")
+		ass\append("#{bold( "#{options.display_reset}" ..':')} reset to whole screen\\N")
+		ass\append("#{bold( "#{options.display_cancel}" ..':')} cancel crop\\N")
 		width, height = math.abs(@pointA.x - @pointB.x), math.abs(@pointA.y - @pointB.y)
-		ass\append("#{bold('ENTER:')} confirm crop (#{width}x#{height})\\N")
+		ass\append("#{bold( "#{options.display_confirm}" .. ':')} confirm crop (#{width}x#{height})\\N")
 		mp.set_osd_ass(window.w, window.h, ass.text)

@@ -1,13 +1,13 @@
 class MainPage extends Page
 	new: =>
 		@keybinds =
-			"c": self\crop
-			"1": self\setStartTime
-			"2": self\setEndTime
-			"o": self\changeOptions
-			"p": self\preview
-			"e": self\encode
-			"ESC": self\hide
+			[options.keybind_crop]: self\crop
+			[options.keybind_seta]: self\setStartTime
+			[options.keybind_setb]: self\setEndTime
+			[options.keybind_options]: self\changeOptions
+			[options.keybind_preview]: self\preview
+			[options.keybind_encode]: self\encode
+			[options.keybind_cancel]: self\hide
 		@startTime = -1
 		@endTime = -1
 		@region = Region!
@@ -23,6 +23,9 @@ class MainPage extends Page
 		if @visible
 			self\clear!
 			self\draw!
+			if options.setb
+				self\encode!
+
 	
 	setupStartAndEndTimes: =>
 		if mp.get_property_native("duration")
@@ -39,19 +42,23 @@ class MainPage extends Page
 			self\clear!
 			self\draw!
 
+	prepare: =>
+		if options.seta
+			self\setStartTime!
+
 	draw: =>
 		window_w, window_h = mp.get_osd_size()
 		ass = assdraw.ass_new()
 		ass\new_event()
 		self\setup_text(ass)
 		ass\append("#{bold('WebM maker')}\\N\\N")
-		ass\append("#{bold('c:')} crop\\N")
-		ass\append("#{bold('1:')} set start time (current is #{seconds_to_time_string(@startTime)})\\N")
-		ass\append("#{bold('2:')} set end time (current is #{seconds_to_time_string(@endTime)})\\N")
-		ass\append("#{bold('o:')} change encode options\\N")
-		ass\append("#{bold('p:')} preview\\N")
-		ass\append("#{bold('e:')} encode\\N\\N")
-		ass\append("#{bold('ESC:')} close\\N")
+		ass\append("#{bold( "#{options.display_crop}" .. ':')} crop\\N")
+		ass\append("#{bold( "#{options.display_seta}" .. ':' )} set start time (current is #{seconds_to_time_string(@startTime)})\\N")
+		ass\append("#{bold( "#{options.display_setb}" .. ':' )} set end time (current is #{seconds_to_time_string(@endTime)})\\N")
+		ass\append("#{bold( "#{options.display_options}" .. ':')} change encode options\\N")
+		ass\append("#{bold( "#{options.display_preview}" .. ':')} preview\\N")
+		ass\append("#{bold( "#{options.display_encode}" .. ':')} encode\\N\\N")
+		ass\append("#{bold( "#{options.display_cancel}" .. ':')} close\\N")
 		mp.set_osd_ass(window_w, window_h, ass.text)
 
 	onUpdateCropRegion: (updated, newRegion) =>

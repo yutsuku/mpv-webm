@@ -115,10 +115,10 @@ class Option
 		else
 			ass\append("#{@displayText}: ")
 		-- left arrow unicode
-		ass\append("◀ ") if self\hasPrevious!
+		ass\append("#{options.display_left} ") if self\hasPrevious!
 		ass\append(self\getDisplayValue!)
 		-- right arrow unicode
-		ass\append(" ▶") if self\hasNext!
+		ass\append(" #{options.display_right}") if self\hasNext!
 		ass\append("\\N")
 
 class EncodeOptionsPage extends Page
@@ -160,12 +160,12 @@ class EncodeOptionsPage extends Page
 		}
 
 		@keybinds =
-			"LEFT": self\leftKey
-			"RIGHT": self\rightKey
-			"UP": self\prevOpt
-			"DOWN": self\nextOpt
-			"ENTER": self\confirmOpts
-			"ESC": self\cancelOpts
+			[options.keybind_left]: self\leftKey
+			[options.keybind_right]: self\rightKey
+			[options.keybind_up]: self\prevOpt
+			[options.keybind_down]: self\nextOpt
+			[options.keybind_confirm]: self\confirmOpts
+			[options.keybind_cancel]: self\cancelOpts
 
 	getCurrentOption: =>
 		return @options[@currentOption][2]
@@ -207,7 +207,7 @@ class EncodeOptionsPage extends Page
 		for i, optPair in ipairs @options
 			opt = optPair[2]
 			opt\draw(ass, @currentOption == i)
-		ass\append("\\N▲ / ▼: navigate\\N")
-		ass\append("#{bold('ENTER:')} confirm options\\N")
-		ass\append("#{bold('ESC:')} cancel\\N")
+		ass\append("\\N#{options.display_up} / #{options.display_down}: navigate\\N")
+		ass\append("#{bold( "#{options.display_confirm}" .. ':')} confirm options\\N")
+		ass\append("#{bold( "#{options.display_cancel}" .. ':')} cancel\\N")
 		mp.set_osd_ass(window_w, window_h, ass.text)

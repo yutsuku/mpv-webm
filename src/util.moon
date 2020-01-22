@@ -1,6 +1,12 @@
 bold = (text) ->
 	"{\\b1}#{text}{\\b0}"
 
+color = (rrggbb, text) ->
+	if string.sub(rrggbb, 1, 1) == "#"
+		rrggbb = string.sub(rrggbb, 2, 7)
+	rr, gg, bb = string.sub(rrggbb, 1, 2), string.sub(rrggbb, 3, 4), string.sub(rrggbb, 5, 6)
+	"{\\c&H#{bb}#{gg}#{rr}&}#{text}{\\c&HFFFFFF&}"
+
 -- OSD message, using ass.
 message = (text, duration) ->
 	ass = mp.get_property_osd("osd-ass-cc/0")

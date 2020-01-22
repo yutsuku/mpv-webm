@@ -7,7 +7,7 @@ class PreviewPage extends Page
 			"pause": mp.get_property_native("pause")
 
 		@keybinds =
-			"ESC": self\cancel
+			[options.keybind_cancel]: self\cancel
 
 		@region = region
 		@startTime = startTime
@@ -47,7 +47,7 @@ class PreviewPage extends Page
 		ass = assdraw.ass_new()
 		ass\new_event()
 		self\setup_text(ass)
-		ass\append("Press #{bold('ESC')} to exit preview.\\N")
+		ass\append("Press #{bold("[options.keybind_cancel]")} to exit preview.\\N")
 		mp.set_osd_ass(window_w, window_h, ass.text)
 
 	cancel: =>

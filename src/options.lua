@@ -1,6 +1,49 @@
 local options = {
 	-- Defaults to shift+w
 	keybind = "W",
+
+	keybind_up = "w",
+	display_up = "▲ w",
+
+	keybind_down = "s",
+	display_down = "▼ s",
+
+	keybind_left = "a",
+	display_left = "◀ A",
+
+	keybind_right = "d",
+	display_right = "D ▶",
+
+	keybind_confirm = "ENTER",
+	display_confirm = "⎆ ENTER",
+	keybind_cancel = "ESC",
+	display_cancel = "🗙 ESC",
+
+	keybind_seta = "a",
+	display_seta = "{\\c&H0f00df&}●{\\c&HFFFFFF&} 1",
+
+	keybind_setb = "b",
+	display_setb = "{\\c&HDF8600&}●{\\c&HFFFFFF&} 2",
+
+	keybind_options = "o",
+	display_options = "☰ o",
+
+	keybind_preview = "p",
+	display_preview = "p",
+
+	keybind_encode = "e",
+	display_encode = "🎥 e",
+
+	keybind_crop = "c",
+	display_crop = "⎄ c",
+
+	keybind_reset = "r",
+	display_reset = "⎚ r",
+
+	-- Set Point A, the start time after showing up the GUI
+	seta = false,
+	-- Starts encode immediately after setting Point B, the end time
+	setb = false,
 	-- If empty, saves on the same directory of the playing video.
 	-- A starting "~" will be replaced by the home dir.
 	-- This field is delimited by double-square-brackets - [[ and ]] - instead of
